@@ -11,17 +11,17 @@ import os
 import torch.utils.data as data
 
 class COCO(data.Dataset):
-  num_classes = 80
-  default_resolution = [512, 512]
-  mean = np.array([0.40789654, 0.44719302, 0.47026115],
+  num_classes = 4 #
+  default_resolution = [512, 512] # [300, 300]
+  mean = np.array([0.250935, 0.575080, 0.331183], # [0.250916, 0.575093, 0.331191]
                    dtype=np.float32).reshape(1, 1, 3)
-  std  = np.array([0.28863828, 0.27408164, 0.27809835],
+  std  = np.array([0.097714, 0.159424, 0.144796], # [0.097681, 0.159054, 0.144669]
                    dtype=np.float32).reshape(1, 1, 3)
 
   def __init__(self, opt, split):
     super(COCO, self).__init__()
-    self.data_dir = os.path.join(opt.data_dir, 'coco')
-    self.img_dir = os.path.join(self.data_dir, '{}2017'.format(split))
+    self.data_dir = os.path.join(opt.data_dir, 'data') # data_dir = '/media/ubuntu/gqp/underwater_od/'
+    self.img_dir = os.path.join(self.data_dir, 'images')
     if split == 'test':
       self.annot_path = os.path.join(
           self.data_dir, 'annotations', 
