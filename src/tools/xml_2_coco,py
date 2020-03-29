@@ -124,7 +124,7 @@ for i in range(4):
     val_idx = rand_num[:val_num]
     train_idx = rand_num[val_num:]
     
-    train_ann = obj_ann_ci[train_idx] #列表
+    train_ann = np.array(obj_ann_ci)[train_idx] #列表
     val_ann = obj_ann_ci[val_idx]
     train_annotations += train_ann
     val_annotations += val_ann
