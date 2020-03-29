@@ -34,7 +34,7 @@ class UWOD(data.Dataset):
       else: # 除exdet之外的训练模式，使用下面的数据集
         self.annot_path = os.path.join(
           self.data_dir, 'annotations_json', 
-          'annotations.json')
+          'annotations_{}.json').format(split) ## 包含annotations_train.json, annotations_val.json, 也可用annotations_trainval.json
     self.max_objs = 128
     self.class_name = [
       '__background__', 'holothurian', 'echinus', 'scallop', 'starfish']
