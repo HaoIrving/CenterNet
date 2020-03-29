@@ -116,7 +116,6 @@ im_idx = [im_idx1, im_idx2, im_idx3, im_idx4]
 
 train_annotations,  val_annotations, train_im_indice, val_im_indice= [], [], [], []
 for i in range(4):
-    train_ann, val_ann = [], []
     obj_ann_ci = ann_info[i]
     im_idx_i = im_idx[i]
     num = len(obj_ann_ci)
@@ -125,16 +124,16 @@ for i in range(4):
     val_idx = rand_num[:val_num]
     train_idx = rand_num[val_num:]
     
-    train_ann = [obj_ann_ci[i] for i in train_idx] #列表
+    train_ann = [obj_ann_ci[m] for m in train_idx] #列表
     val_ann = [obj_ann_ci[j] for j in val_idx]
     train_annotations += train_ann
     val_annotations += val_ann
         
-    train_im_idxs = im_idx_i[train_idx] #列表, 需去除重复
+    train_im_idxs = [im_idx_i[m] for m in train_idx] #列表, 需去除重复
     # train_im_idx = sorted(set(train_im_idxs),key=train_im_idxs.index) #保持顺序
     train_im_idx = list(set(train_im_idxs)) # 返回排序后的结果
     train_im_indice += train_im_idx
-    val_im_idxs = im_idx_i[val_idx]
+    val_im_idxs = [im_idx_i[n] for n in val_idx]
     # val_im_idx = sorted(set(val_im_idxs),key=val_im_idxs.index)
     val_im_idx = list(set(val_im_idxs))
     val_im_indice += val_im_idx    
