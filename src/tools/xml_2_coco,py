@@ -1,0 +1,159 @@
+"""
+按3:1:1划分train set, val set, test set
+比赛的test set没有标签，不考虑它的划分
+"""
+import os
+import cv2
+import json
+import xml.dom.minidom
+import xml.etree.ElementTree as ET
+import numpy as np
+
+def get_segmentation(points):
+
+    return [points[0], points[1], points[2] + points[0], points[1],
+             points[2] + points[0], points[3] + points[1], points[0], points[3] + points[1]]
+
+
+root_dir = os.path.join(os.path.dirname(__file__), '..', '..')
+data_dir = os.path.join(root_dir, 'data/underwater_od_data/train') #待修改，使用data/underwater_od_data软连接
+
+image_file_dir = os.path.join(data_dir, 'image')
+xml_file_dir = os.path.join(data_dir, 'box')
+
+annotations_info = {'images': [], 'annotations': [], 'categories': []}
+
+categories_map = {'holothurian': 1, 'echinus': 2, 'scallop': 3, 'starfish': 4}
+
+for key in categories_map:
+    categoriy_info = {"id":categories_map[key], "name":key}
+    annotations_info['categories'].append(categoriy_info) ##'categories': [{1, name}, {2, name},...] [4]
+
+file_names = [image_file_name.split('.')[0]
+              for image_file_name in os.listdir(image_file_dir)]
+ann_id = 1
+for i, file_name in enumerate(file_names):
+
+    image_file_name = file_name + '.jpg'
+    xml_file_name = file_name + '.xml'
+    image_file_path = os.path.join(image_file_dir, image_file_name)
+    xml_file_path = os.path.join(xml_file_dir, xml_file_name)
+
+    image_info = dict() ##字典
+    image = cv2.cvtColor(cv2.imread(image_file_path), cv2.COLOR_BGR2RGB)
+    height, width, _ = image.shape
+    image_info = {'file_name': image_file_name, 'id': i+1,
+                  'height': height, 'width': width}
+    annotations_info['images'].append(image_info) ##'images': [{iminfo1}, {iminfo2}, ...] [#images]
+
+    DOMTree = xml.dom.minidom.parse(xml_file_path)
+    collection = DOMTree.documentElement
+
+    names = collection.getElementsByTagName('name')
+    names = [name.firstChild.data for name in names]
+
+    xmins = collection.getElementsByTagName('xmin')
+    xmins = [xmin.firstChild.data for xmin in xmins]
+    ymins = collection.getElementsByTagName('ymin')
+    ymins = [ymin.firstChild.data for ymin in ymins]
+    xmaxs = collection.getElementsByTagName('xmax')
+    xmaxs = [xmax.firstChild.data for xmax in xmaxs]
+    ymaxs = collection.getElementsByTagName('ymax')
+    ymaxs = [ymax.firstChild.data for ymax in ymaxs]
+
+    object_num = len(names)
+
+    for j in range(object_num):
+        if names[j] in categories_map:
+            image_id = i + 1
+            x1,y1,x2,y2 = int(xmins[j]),int(ymins[j]),int(xmaxs[j]),int(ymaxs[j])
+            x1,y1,x2,y2 = x1 - 1,y1 - 1,x2 - 1,y2 - 1
+
+            if x2 == width:
+                x2 -= 1
+            if y2 == height:
+                y2 -= 1
+
+            x,y = x1,y1
+            w,h = x2 - x1 + 1,y2 - y1 + 1
+            category_id = categories_map[names[j]]
+            area = w * h
+            segmentation = get_segmentation([x, y, w, h])
+            annotation_info = {"id": ann_id, 
+                               "image_id":image_id, 
+                               "bbox":[x, y, w, h], 
+                               "category_id": category_id, 
+                               "area": area,
+                               "segmentation": segmentation,
+                               "iscrowd": 0}
+            annotations_info['annotations'].append(annotation_info) ## 'annotations': [{obj_ann1}, {obj_ann2}, ...] [#objs]
+            ann_id += 1
+
+# split trian val 3/1, annotations_info = {'images': [], 'annotations': [], 'categories': []} 
+# ctg相同，img和ann根据ojb的"category_id"进行划分，
+# 每个类别均匀抽样1/4
+
+split = 0.25
+ann_info_c1, ann_info_c2, ann_info_c3, ann_info_c4 = [], [], [], []
+im_idx1, im_idx2, im_idx3, im_idx4 = [], [], [], []
+
+for obj_ann in  annotations_info['annotations']:
+    imid = obj_ann["image_id"]
+    if obj_ann["category_id"] == 1:
+        ann_info_c1.append(obj_ann)
+        im_idx1.append(imid) # 会有重复
+    elif obj_ann["category_id"] == 2:
+        ann_info_c2.append(obj_ann)
+        im_idx2.append(imid)
+    elif obj_ann["category_id"] == 3:
+        ann_info_c3.append(obj_ann)
+        im_idx3.append(imid)
+    else:
+        ann_info_c4.append(obj_ann)
+        im_idx4.append(imid)
+ann_info = [ann_info_c1, ann_info_c2, ann_info_c3, ann_info_c4]
+im_idx = [im_idx1, im_idx2, im_idx3, im_idx4]
+
+train_annotations,  val_annotations, train_im_indice, val_im_indice= [], [], [], []
+for i in range(4):
+    obj_ann_ci = ann_info[i]
+    im_idx_i = im_idx[i]
+    num = len(obj_ann_ci)
+    val_num = int(num * split)
+    rand_num = np.random.permutation(num)
+    val_idx = rand_num[:val_num]
+    train_idx = rand_num[val_num:]
+    
+    train_ann = obj_ann_ci[train_idx] #列表
+    val_ann = obj_ann_ci[val_idx]
+    train_annotations += train_ann
+    val_annotations += val_ann
+        
+    train_im_idxs = im_idx_i[train_idx] #列表, 需去除重复
+    # train_im_idx = sorted(set(train_im_idxs),key=train_im_idxs.index) #保持顺序
+    train_im_idx = list(set(train_im_idxs)) # 返回排序后的结果
+    train_im_indice += train_im_idx
+    val_im_idxs = im_idx_i[val_idx]
+    # val_im_idx = sorted(set(val_im_idxs),key=val_im_idxs.index)
+    val_im_idx = list(set(val_im_idxs))
+    val_im_indice += val_im_idx    
+
+annotations_info_train = {'images':annotations_info['images'][train_im_indice], 
+                          'annotations': train_annotations, 
+                          'categories': annotations_info['categories']}
+annotations_info_val =   {'images':annotations_info['images'][val_im_indice], 
+                          'annotations': val_annotations, 
+                          'categories': annotations_info['categories']}
+
+
+with  open('data_dir/annotations/annotations_trainval.json', 'w')  as f:
+    json.dump(annotations_info, f, indent=4)
+with  open('data_dir/annotations/annotations_train.json', 'w')  as f:
+    json.dump(annotations_info_trian, f, indent=4)
+with  open('data_dir/annotations/annotations_val.json', 'w')  as f:
+    json.dump(annotations_info_val, f, indent=4)
+    
+print('---整理后的标注文件---')
+print('所有图片, train, val images的数量：', (len(annotations_info['images']),len(annotations_info_train['images']),len(annotations_info_val['images'])))
+print('所有标注, train, val ann的数量：', (len(annotations_info['annotations']),len(annotations_info_train['annotations']),len(annotations_info_val['annotations'])))
+print('所有类别的数量：',  len(annotations_info['categories']))
