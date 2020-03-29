@@ -20,7 +20,7 @@ class UWOD(data.Dataset):
 
   def __init__(self, opt, split):
     super(UWOD, self).__init__() #
-    self.data_dir = os.path.join(opt.data_dir, 'data') # data_dir = '/media/ubuntu/gqp/underwater_od'
+    self.data_dir = os.path.join(opt.data_dir, 'underwater_od_data') # underwater_od_data = '/media/ubuntu/gqp/underwater_od/data'软连接
     self.img_dir = os.path.join(self.data_dir, 'images') # todo: 添加2018年的数据
     if split == 'test':
       self.annot_path = os.path.join(
