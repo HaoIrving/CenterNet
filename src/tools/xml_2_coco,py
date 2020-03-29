@@ -149,7 +149,7 @@ annotations_info_val =   {'images':[annotations_info['images'][i-1] for i in val
 with  open(os.path.join(root_dir, 'data/underwater_od_data/annotations_json/annotations_trainval.json'), 'w')  as f:
     json.dump(annotations_info, f, indent=4)
 with  open(os.path.join(root_dir, 'data/underwater_od_data/annotations_json/annotations_train.json'), 'w')  as f:
-    json.dump(annotations_info_trian, f, indent=4)
+    json.dump(annotations_info_train, f, indent=4)
 with  open(os.path.join(root_dir, 'data/underwater_od_data/annotations_json/annotations_val.json'), 'w')  as f:
     json.dump(annotations_info_val, f, indent=4)
     
