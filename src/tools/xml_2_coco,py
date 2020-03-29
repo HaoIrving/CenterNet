@@ -116,6 +116,7 @@ im_idx = [im_idx1, im_idx2, im_idx3, im_idx4]
 
 train_annotations,  val_annotations, train_im_indice, val_im_indice= [], [], [], []
 for i in range(4):
+    train_ann, val_ann = [], []
     obj_ann_ci = ann_info[i]
     im_idx_i = im_idx[i]
     num = len(obj_ann_ci)
@@ -124,8 +125,8 @@ for i in range(4):
     val_idx = rand_num[:val_num]
     train_idx = rand_num[val_num:]
     
-    train_ann = np.array(obj_ann_ci)[train_idx] #列表
-    val_ann = obj_ann_ci[val_idx]
+    train_ann = [obj_ann_ci[i] for i in train_idx] #列表
+    val_ann = [obj_ann_ci[j] for j in val_idx]
     train_annotations += train_ann
     val_annotations += val_ann
         
