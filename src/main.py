@@ -19,29 +19,29 @@ from trains.train_factory import train_factory
 def main(opt):
   torch.manual_seed(opt.seed)
   torch.backends.cudnn.benchmark = not opt.not_cuda_benchmark and not opt.test
-  Dataset = get_dataset(opt.dataset, opt.task)
-  opt = opts().update_dataset_info_and_set_heads(opt, Dataset)
+  Dataset = get_dataset(opt.dataset, opt.task) ##子类Dataset的实例，两个父类CTDetDataset(data.Dataset)/COCO(data.Dataset), torch.data
+  opt = opts().update_dataset_info_and_set_heads(opt, Dataset) # 确定输出层节点数，并存入opt
   print(opt)
 
-  logger = Logger(opt)
+  logger = Logger(opt) # 定义类Logger类的一个实例
 
   os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
   opt.device = torch.device('cuda' if opt.gpus[0] >= 0 else 'cpu')
   
   print('Creating model...')
-  model = create_model(opt.arch, opt.heads, opt.head_conv)
+  model = create_model(opt.arch, opt.heads, opt.head_conv) ##  --arch, default='dla_34'
   optimizer = torch.optim.Adam(model.parameters(), opt.lr)
   start_epoch = 0
   if opt.load_model != '':
-    model, optimizer, start_epoch = load_model(
+    model, optimizer, start_epoch = load_model( 
       model, opt.load_model, optimizer, opt.resume, opt.lr, opt.lr_step)
 
-  Trainer = train_factory[opt.task]
+  Trainer = train_factory[opt.task] ##'task', default='ctdet', 'ctdet': CtdetTrainer, loss, debug, save results
   trainer = Trainer(opt, model, optimizer)
   trainer.set_device(opt.gpus, opt.chunk_sizes, opt.device)
 
   print('Setting up data...')
-  val_loader = torch.utils.data.DataLoader(
+  val_loader = torch.utils.data.DataLoader( ##验证集
       Dataset(opt, 'val'), 
       batch_size=1, 
       shuffle=False,
@@ -49,12 +49,12 @@ def main(opt):
       pin_memory=True
   )
 
-  if opt.test:
+  if opt.test: ##opt.test==验证
     _, preds = trainer.val(0, val_loader)
     val_loader.dataset.run_eval(preds, opt.save_dir)
     return
 
-  train_loader = torch.utils.data.DataLoader(
+  train_loader = torch.utils.data.DataLoader( ##训练集
       Dataset(opt, 'train'), 
       batch_size=opt.batch_size, 
       shuffle=True,
