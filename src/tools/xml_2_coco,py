@@ -138,10 +138,10 @@ for i in range(4):
     val_im_idx = list(set(val_im_idxs))
     val_im_indice += val_im_idx    
 
-annotations_info_train = {'images':[annotations_info['images'][i] for i in train_im_indice], 
+annotations_info_train = {'images':[annotations_info['images'][i-1] for i in train_im_indice], 
                           'annotations': train_annotations, 
                           'categories': annotations_info['categories']}
-annotations_info_val =   {'images':[annotations_info['images'][i] for i in val_im_indice], 
+annotations_info_val =   {'images':[annotations_info['images'][i-1] for i in val_im_indice], 
                           'annotations': val_annotations, 
                           'categories': annotations_info['categories']}
 
