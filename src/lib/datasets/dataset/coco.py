@@ -12,7 +12,7 @@ import torch.utils.data as data
 
 class COCO(data.Dataset):
   num_classes = 4 #
-  default_resolution = [512, 512] # [300, 300]
+  default_resolution = [512, 512] # todo: [300, 300]
   mean = np.array([0.250935, 0.575080, 0.331183], # [0.250916, 0.575093, 0.331191]
                    dtype=np.float32).reshape(1, 1, 3)
   std  = np.array([0.097714, 0.159424, 0.144796], # [0.097681, 0.159054, 0.144669]
@@ -20,45 +20,26 @@ class COCO(data.Dataset):
 
   def __init__(self, opt, split):
     super(COCO, self).__init__()
-    self.data_dir = os.path.join(opt.data_dir, 'data') # data_dir = '/media/ubuntu/gqp/underwater_od/'
-    self.img_dir = os.path.join(self.data_dir, 'images')
+    self.data_dir = os.path.join(opt.data_dir, 'data') # data_dir = '/media/ubuntu/gqp/underwater_od'
+    self.img_dir = os.path.join(self.data_dir, 'images') # todo: 添加2018年的数据
     if split == 'test':
       self.annot_path = os.path.join(
           self.data_dir, 'annotations', 
           'image_info_test-dev2017.json').format(split)
-    else:
-      if opt.task == 'exdet':
+    else: # train mode
+      if opt.task == 'exdet': # 人体关键点检测extreme net
         self.annot_path = os.path.join(
           self.data_dir, 'annotations', 
           'instances_extreme_{}2017.json').format(split)
-      else:
+      else: # 除exdet之外的训练模式，使用下面的数据集
         self.annot_path = os.path.join(
-          self.data_dir, 'annotations', 
-          'instances_{}2017.json').format(split)
+          self.data_dir, 'annotations_json', 
+          'annotations.json')
     self.max_objs = 128
     self.class_name = [
-      '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
-      'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant',
-      'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse',
-      'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack',
-      'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis',
-      'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove',
-      'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass',
-      'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich',
-      'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake',
-      'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv',
-      'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave',
-      'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
-      'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+      '__background__', 'holothurian', 'echinus', 'scallop', 'starfish']
     self._valid_ids = [
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 
-      14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 
-      24, 25, 27, 28, 31, 32, 33, 34, 35, 36, 
-      37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 
-      48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 
-      58, 59, 60, 61, 62, 63, 64, 65, 67, 70, 
-      72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 
-      82, 84, 85, 86, 87, 88, 89, 90]
+       0, 1, 2, 3, 4]
     self.cat_ids = {v: i for i, v in enumerate(self._valid_ids)}
     self.voc_color = [(v // 32 * 64 + 64, (v // 8) % 4 * 64, v % 8 * 32) \
                       for v in range(1, self.num_classes + 1)]
