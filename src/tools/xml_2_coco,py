@@ -89,6 +89,11 @@ for i, file_name in enumerate(file_names):
             annotations_info['annotations'].append(annotation_info) ## 'annotations': [{obj_ann1}, {obj_ann2}, ...] [#objs]
             ann_id += 1
 
+print('---整理后的标注文件---')
+print('所有图片的数量：',  len(annotations_info['images']))
+print('所有标注的数量：',  len(annotations_info['annotations']))
+print('所有类别的数量：',  len(annotations_info['categories']))
+
 # split trian val 3/1, annotations_info = {'images': [], 'annotations': [], 'categories': []} 
 # ctg相同，img和ann根据ojb的"category_id"进行划分，
 # 每个类别均匀抽样1/4
@@ -138,6 +143,8 @@ for i in range(4):
     val_im_idx = list(set(val_im_idxs))
     val_im_indice += val_im_idx    
 
+train_im_indice = list(set(train_im_indice))
+val_im_indice = list(set(val_im_indice))
 annotations_info_train = {'images':[annotations_info['images'][i-1] for i in train_im_indice], 
                           'annotations': train_annotations, 
                           'categories': annotations_info['categories']}
@@ -153,7 +160,7 @@ with  open(os.path.join(root_dir, 'data/underwater_od_data/annotations_json/anno
 with  open(os.path.join(root_dir, 'data/underwater_od_data/annotations_json/annotations_val.json'), 'w')  as f:
     json.dump(annotations_info_val, f, indent=4)
     
-print('---整理后的标注文件---')
+print('---抽样后的标注文件---')
 print('所有图片, train, val images的数量：', (len(annotations_info['images']),len(annotations_info_train['images']),len(annotations_info_val['images'])))
 print('所有标注, train, val ann的数量：', (len(annotations_info['annotations']),len(annotations_info_train['annotations']),len(annotations_info_val['annotations'])))
 print('所有类别的数量：',  len(annotations_info['categories']))
