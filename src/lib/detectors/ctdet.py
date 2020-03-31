@@ -95,5 +95,5 @@ class CtdetDetector(BaseDetector):
               if bbox[4] > self.opt.vis_thresh:
                   info = debugger.add_coco_bbox(bbox[:4], j - 1, bbox[4], img_id='ctdet')##
                   infos.append(info)##
-      debugger.show_all_imgs(pause=self.pause)
+      # debugger.show_all_imgs(pause=self.pause)
       return infos##
