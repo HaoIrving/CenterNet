@@ -58,11 +58,15 @@ def demo():
             print(time_str)
 
         results_str = json.dumps(results)
-        if opt.flip_test == True:
+        if opt.flip_test == True and len(opt.test_scales) is not 1:
+          with open(opt.save_dir+"/result_{}_{}.json".format('test-A', 'flip + multi scale'), 'w') as json_file:
+            json_file.write(results_str)
+          print('result of flip + multi scale augmentation, saved in ', opt.save_dir)
+        elif opt.flip_test == True and len(opt.test_scales) is 1:
           with open(opt.save_dir+"/result_{}_{}.json".format('test-A', 'flip'), 'w') as json_file:
             json_file.write(results_str)
           print('result of flip augmentation, saved in ', opt.save_dir)
-        elif len(opt.test_scales) is not 1: #后面L237改成了list
+        elif opt.flip_test == False and len(opt.test_scales) is not 1: #后面L237改成了list
           with open(opt.save_dir+"/result_{}_{}.json".format('test-A', 'multi scale test'), 'w') as json_file:
             json_file.write(results_str)
           print('result of multi scale test augmentation, saved in ', opt.save_dir)
