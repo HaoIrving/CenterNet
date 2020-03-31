@@ -337,7 +337,7 @@ class opts(object):
     default_dataset_info = { # 修改ctdet任务使用的默认数据集
       'ctdet': {'default_resolution': [512, 512], 'num_classes': 4, ##
                 'mean': [0.251, 0.575, 0.331], 'std': [0.098, 0.159, 0.145],##
-                'dataset': 'coco'},
+                'dataset': 'uwod'}, ##
       'exdet': {'default_resolution': [512, 512], 'num_classes': 80, 
                 'mean': [0.408, 0.447, 0.470], 'std': [0.289, 0.274, 0.278],
                 'dataset': 'coco'},
