@@ -169,27 +169,31 @@ class Debugger(object):
       cv2.circle(self.imgs[img_id], (rect2[0], rect2[1]), int(10 * conf), c, 1)
       cv2.circle(self.imgs[img_id], (rect1[0], rect2[1]), int(10 * conf), c, 1)
       cv2.circle(self.imgs[img_id], (rect2[0], rect1[1]), int(10 * conf), c, 1)
+      
+  def add_coco_bbox(self, bbox, cat, conf=1, show_txt=True, img_id='default'):
+      bbox = np.array(bbox, dtype=np.int32)
+        # cat = (int(cat) + 1) % 80
 
-  def add_coco_bbox(self, bbox, cat, conf=1, show_txt=True, img_id='default'): 
-    bbox = np.array(bbox, dtype=np.int32)
-    # cat = (int(cat) + 1) % 80
-    cat = int(cat)
-    # print('cat', cat, self.names[cat])
-    c = self.colors[cat][0][0].tolist()
-    if self.theme == 'white':
-      c = (255 - np.array(c)).tolist()
-    txt = '{}{:.1f}'.format(self.names[cat], conf)
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    cat_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
-    cv2.rectangle(
-      self.imgs[img_id], (bbox[0], bbox[1]), (bbox[2], bbox[3]), c, 2)
-    if show_txt:
-      cv2.rectangle(self.imgs[img_id],
-                    (bbox[0], bbox[1] - cat_size[1] - 2),
-                    (bbox[0] + cat_size[0], bbox[1] - 2), c, -1)
-      cv2.putText(self.imgs[img_id], txt, (bbox[0], bbox[1] - 2), 
-                  font, 0.5, (0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
-
+      cat = int(cat)
+        # print('cat', cat, self.names[cat])
+      c = self.colors[cat][0][0].tolist()
+      if self.theme == 'white':
+          c = (255 - np.array(c)).tolist()
+      txt = '{}{:.1f}'.format(cat, conf)
+      bbox_info = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])] ##
+      info = [bbox_info, self.names[cat], float(conf)] ##
+      font = cv2.FONT_HERSHEY_SIMPLEX
+      cat_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
+      cv2.rectangle(
+          self.imgs[img_id], (bbox[0], bbox[1]), (bbox[2], bbox[3]), c, 2)
+      if show_txt:
+          cv2.rectangle(self.imgs[img_id],
+                        (bbox[0], bbox[1] - cat_size[1] - 2),
+                        (bbox[0] + cat_size[0], bbox[1] - 2), c, -1)
+          cv2.putText(self.imgs[img_id], txt, (bbox[0], bbox[1] - 2),
+                      font, 0.5, (0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
+      return info ##
+  
   def add_coco_hp(self, points, img_id='default'): 
     points = np.array(points, dtype=np.int32).reshape(self.num_joints, 2)
     for j in range(self.num_joints):
