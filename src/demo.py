@@ -59,14 +59,17 @@ def demo():
 
         results_str = json.dumps(results)
         if opt.flip_test == True:
-          with open(opt.save_dir+"/{}_{}.json".format(opt.exp_id, 'flip data augmentation'), 'w') as json_file:
+          with open(opt.save_dir+"/result_{}_{}.json".format('test-A', 'flip'), 'w') as json_file:
             json_file.write(results_str)
-        elif opt.test_scales is not '1':
-          with open(opt.save_dir+"/{}_{}.json".format(opt.exp_id, 'multi scale test augmentation'), 'w') as json_file:
+          print('result of flip augmentation, saved in ', opt.save_dir)
+        elif len(opt.test_scales) is not 1: #后面L237改成了list
+          with open(opt.save_dir+"/result_{}_{}.json".format('test-A', 'multi scale test'), 'w') as json_file:
             json_file.write(results_str)
+          print('result of multi scale test augmentation, saved in ', opt.save_dir)
         else:
-          with open(opt.save_dir+"/{}.json".format(opt.exp_id), 'w') as json_file:
+          with open(opt.save_dir+"/result_{}.json".format('test-A'), 'w') as json_file:
             json_file.write(results_str)
+          print('result with no augmentation, saved in ', opt.save_dir)
 
 
 if __name__ == '__main__':
