@@ -22,10 +22,11 @@ class UWOD(data.Dataset):
     super(UWOD, self).__init__() #
     self.data_dir = os.path.join(opt.data_dir, 'underwater_od_data') # underwater_od_data = '/media/ubuntu/gqp/underwater_od/data'软连接
     self.img_dir = os.path.join(self.data_dir, 'images') # todo: 添加2018年的数据
+    opt.exp_mode = split
     if split == 'test':
       self.annot_path = os.path.join(
-          self.data_dir, 'annotations', 
-          'image_info_test-dev2017.json').format(split)
+          self.data_dir, 'annotations_json', 
+          'testA.json')
     else: # train mode
       if opt.task == 'exdet': # 人体关键点检测extreme net
         self.annot_path = os.path.join(
@@ -39,7 +40,7 @@ class UWOD(data.Dataset):
     self.class_name = [
       '__background__', 'holothurian', 'echinus', 'scallop', 'starfish']
     self._valid_ids = [
-       0, 1, 2, 3, 4]
+       1, 2, 3, 4]
     self.cat_ids = {v: i for i, v in enumerate(self._valid_ids)}
     self.voc_color = [(v // 32 * 64 + 64, (v // 8) % 4 * 64, v % 8 * 32) \
                       for v in range(1, self.num_classes + 1)]
@@ -96,7 +97,7 @@ class UWOD(data.Dataset):
 
   def save_results(self, results, save_dir):
     json.dump(self.convert_eval_format(results), 
-                open('{}/results.json'.format(save_dir), 'w'))
+                open('{}/{}_results.json'.format(save_dir, opt.exp_mode), 'w'))
   
   def run_eval(self, results, save_dir):
     # result_json = os.path.join(save_dir, "results.json")
